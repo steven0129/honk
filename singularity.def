@@ -1,0 +1,21 @@
+Bootstrap: docker
+From: pytorch/pytorch:1.12.1-cuda11.3-cudnn8-devel
+
+%post
+    apt-get update
+    apt-get install -y git portaudio19-dev
+    pip install chainmap
+    pip install cherrypy==11.2.0
+    pip install librosa==0.10.0
+    pip install Flask==2.2.5
+    pip install numpy==1.21.5
+    pip install Pillow==9.0.1
+    pip install PyAudio==0.2.13
+    pip install PyOpenGL==3.1.7
+    pip install PyOpenGL_accelerate==3.1.7
+    pip install pyttsx3==2.6
+    pip install requests
+    pip install SpeechRecognition==3.7.1
+    pip install tqdm
+    pip install git+https://github.com/daemon/pytorch-pcen
+    echo "You can start to build your amazing work!!"

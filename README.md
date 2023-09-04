@@ -21,6 +21,7 @@ Currently, PyTorch has official support for only Linux and OS X. Thus, Windows u
 
 To deploy the demo, run the following commands:
 - If you do not have PyTorch, please see [the website](http://pytorch.org).
+- `apt-get install portaudio19-dev`
 - Install Python dependencies: `pip install -r requirements.txt`
 - Install GLUT (OpenGL Utility Toolkit) through your package manager (e.g. `apt-get install freeglut3-dev`)
 - Fetch the data and models: `./fetch_data.sh`

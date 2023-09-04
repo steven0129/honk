@@ -15,11 +15,64 @@ def set_speech_format(f):
     f.setsampwidth(2)
     f.setframerate(16000)
 
+def dct(n_filters, n_input):
+    """Discrete cosine transform (DCT type-III) basis.
+
+    .. [1] http://en.wikipedia.org/wiki/Discrete_cosine_transform
+
+    Parameters
+    ----------
+    n_filters : int > 0 [scalar]
+        number of output components (DCT filters)
+
+    n_input : int > 0 [scalar]
+        number of input components (frequency bins)
+
+    Returns
+    -------
+    dct_basis: np.ndarray [shape=(n_filters, n_input)]
+        DCT (type-III) basis vectors [1]_
+
+    Notes
+    -----
+    This function caches at level 10.
+
+    Examples
+    --------
+    >>> n_fft = 2048
+    >>> dct_filters = librosa.filters.dct(13, 1 + n_fft // 2)
+    >>> dct_filters
+    array([[ 0.031,  0.031, ...,  0.031,  0.031],
+           [ 0.044,  0.044, ..., -0.044, -0.044],
+           ...,
+           [ 0.044,  0.044, ..., -0.044, -0.044],
+           [ 0.044,  0.044, ...,  0.044,  0.044]])
+
+    >>> import matplotlib.pyplot as plt
+    >>> plt.figure()
+    >>> librosa.display.specshow(dct_filters, x_axis='linear')
+    >>> plt.ylabel('DCT function')
+    >>> plt.title('DCT filter bank')
+    >>> plt.colorbar()
+    >>> plt.tight_layout()
+    """
+
+    basis = np.empty((n_filters, n_input))
+    basis[0, :] = 1.0 / np.sqrt(n_input)
+
+    samples = np.arange(1, 2*n_input, 2) * np.pi / (2.0 * n_input)
+
+    for i in range(1, n_filters):
+        basis[i, :] = np.cos(i*samples) * np.sqrt(2.0/n_input)
+
+    return basis
+
+
 class AudioPreprocessor(object):
     def __init__(self, sr=16000, n_dct_filters=40, n_mels=40, f_max=4000, f_min=20, n_fft=480, hop_ms=10):
         super().__init__()
         self.n_mels = n_mels
-        self.dct_filters = librosa.filters.dct(n_dct_filters, n_mels)
+        self.dct_filters = dct(n_dct_filters, n_mels)
         self.sr = sr
         self.f_max = f_max if f_max is not None else sr // 2
         self.f_min = f_min
@@ -29,7 +82,7 @@ class AudioPreprocessor(object):
 
     def compute_mfccs(self, data):
         data = librosa.feature.melspectrogram(
-            data,
+            y=data,
             sr=self.sr,
             n_mels=self.n_mels,
             hop_length=self.hop_length,
@@ -47,7 +100,7 @@ class AudioPreprocessor(object):
         return data
 
 class AudioSnippet(object):
-    _dct_filters = librosa.filters.dct(40, 40)
+    _dct_filters = dct(40, 40)
     def __init__(self, byte_data=b"", dtype=np.int16):
         self.byte_data = byte_data
         self.dtype = dtype
